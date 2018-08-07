@@ -21,7 +21,7 @@ class gpxGen extends PolylineEncoder {
         return $content;
 	}
     private function _is_double($input){
-        return is_double($input) || is_numeric($input)? true : false;
+        return is_double($input)? true : false;
     }
     public function get_route(){
 		$output = array();
