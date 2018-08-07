@@ -7,8 +7,6 @@ if($_POST){
     $from = explode(',', $_POST['from_gps']);
     $to = explode(',', $_POST['to_gps']);
     $route = $gpxGen->get_route($from[0], $from[1], $to[0], $to[1]); ## Generate route between two points using Google Maps API
-//print_r($route);
-//print_r($gpxGen->route2array());
     if(!empty($route['polyline'])){
         header('Content-type: text/xml');
         header('Content-Description: File Transfer');
@@ -135,7 +133,6 @@ if($_POST){
                   position: new google.maps.LatLng(Lat, Lng)
                 });
                 google.maps.event.addListener(marker, 'drag', function(){
-//                    __toggleBounce(marker.getPosition());
                     if(holderID == 'map_to'){
                         $('input[name=to_gps]').val(marker.getPosition().lat() + ',' + marker.getPosition().lng());
                     }else{
@@ -143,14 +140,27 @@ if($_POST){
                     }
                 });
                 google.maps.event.addListener(marker, 'dragend', function(){
-//                    __google_map_geocodeLatLng(marker.getPosition());
                 });
             }
+        };
+        // Converts from degrees to radians. | http://cwestblog.com/2012/11/12/javascript-degree-and-radian-conversion/
+        Math.radians = function(degrees) {
+            "use strict";
+            return degrees * Math.PI / 180;
+        };
+
+        // Converts from radians to degrees. | http://cwestblog.com/2012/11/12/javascript-degree-and-radian-conversion/
+        Math.degrees = function(radians) {
+            "use strict";
+            return radians * 180 / Math.PI;
+        };
+        var location_distance = function(fromLatitude, fromLongitude, latitude, longitude){
+            "use strict";
+            return ( 6371 * Math.acos( Math.cos( Math.radians(fromLatitude) ) * Math.cos(Math.radians(latitude) ) * Math.cos( Math.radians(longitude) - Math.radians(fromLongitude) ) + Math.sin( Math.radians(fromLatitude) ) * Math.sin(Math.radians(latitude)) ) ) ;
         };
         $(document).ready(function(){
             "use strict";
             __load_google_places();
-//            alert('test');
         });
         $(document).on('change', 'input[name=from_gps]', function(){
             "use strict";
@@ -161,6 +171,27 @@ if($_POST){
             "use strict";
             var latlng = $(this).val().split(',');
             __load_google_map('map_to', latlng[0], latlng[1], 12);
+        });
+        $(document).on('submit', 'form[name=download_gpx]', function(){
+            "use strict";
+            var maxDistance = 200;
+            var distance = 0;
+            var response = false;
+            var from_gps = $('input[name=from_gps]').val();
+            var to_gps = $('input[name=to_gps]').val();
+            if(from_gps.length > 0 && to_gps.length > 0){
+                from_gps = from_gps.split(',');
+                to_gps = to_gps.split(',');
+                distance = location_distance(from_gps[0], from_gps[1], to_gps[0], to_gps[1])
+                if(distance <= maxDistance){
+                    response = true;
+                }else{
+                    alert('The distance between locations is ' + distance.toFixed(3) + 'KM\nMax Distance is ' + maxDistance + 'KM\n(well, you can change it, but on your device)');
+                }
+            }else{
+                alert('You must select two locations');
+            }            
+            return response;
         });
     </script>
 </body>
