@@ -111,7 +111,6 @@ class gpxGen extends PolylineEncoder {
         return $xmlData;
     }
     private function doLog($input){
-        // $this->doLog(time()."\t".date('Y-m-d H:i', time())."\t".$args[0].','.$args[1]."\t".$args[2].','.$args[3]."\t".$_SERVER['REMOTE_ADDR']."\t".$_SERVER['HTTP_USER_AGENT']);
         if(is_writable($this->logDir)){
             $preappend = ''; 
             $file = $this->logDir.'/'.date('Y-m', time()).'.log';
