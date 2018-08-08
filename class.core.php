@@ -2,11 +2,31 @@
 require_once('class.PolylineEncoder.php');
 class gpxGen extends PolylineEncoder {
     private $apiKey;
+    public $logInputs = false;
+    public $logDir = 'logs';
     public $polyline = '';
-    public function __construct($apiKey){
+    public $connectTimeOut = 10;
+    public function __construct($apiKey, $logInputs = false){
         if(empty($apiKey)) exit('You must write Google API Key');
         $this->apiKey = $apiKey;
+        $this->logInputs = $logInputs;
+        if($this->logInputs && !is_dir($this->logDir)){
+            if(is_writable('./')){
+                mkdir($this->logDir, 0777);
+                $this->protect_directory_access($this->logDir, 'comprehensive');
+            }else{
+                trigger_error("Unable to create Logs directory");
+            }            
+        }
     }
+    public function protect_directory_access($directory, $type = 'access'){
+		$file = $directory.'/.htaccess';
+		if(!file_exists($file)){
+            $handle = fopen($file, 'w');
+            fwrite($handle, ($type == 'comprehensive'? 'deny from all' : 'Options -Indexes'));
+            fclose($handle);
+        }
+	}
     private function api($url, $header=false, $sslvar=false){
         $connection = curl_init();
         curl_setopt($connection, CURLOPT_URL, $url);
@@ -36,6 +56,9 @@ class gpxGen extends PolylineEncoder {
                         $output['duration'] = $data['routes'][0]['legs'][0]['duration'];
                         $output['polyline'] = $data['routes'][0]['overview_polyline']['points'];
                         $this->polyline = $output['polyline'];
+                        if($this->logInputs){
+                            $this->doLog(time()."\t".date('Y-m-d H:i', time())."\t".$args[0].','.$args[1]."\t".$args[2].','.$args[3]."\t".$_SERVER['REMOTE_ADDR']."\t".$_SERVER['HTTP_USER_AGENT']);
+                        }
                     }
                 }
             }else{
@@ -86,6 +109,21 @@ class gpxGen extends PolylineEncoder {
             trigger_error("There is no route created");
         }
         return $xmlData;
+    }
+    private function doLog($input){
+        // $this->doLog(time()."\t".date('Y-m-d H:i', time())."\t".$args[0].','.$args[1]."\t".$args[2].','.$args[3]."\t".$_SERVER['REMOTE_ADDR']."\t".$_SERVER['HTTP_USER_AGENT']);
+        if(is_writable($this->logDir)){
+            $preappend = ''; 
+            $file = $this->logDir.'/'.date('Y-m', time()).'.log';
+            if(!file_exists($file)){
+                $preappend = "Timestamp\tDate\tStarting LatLng\tEnding LatLng\tIP\tBrowser";
+            }
+            $handle = fopen($file, 'a');
+            fwrite($handle, (!empty($preappend)? $preappend."\n" : '').$input."\n");
+            fclose($handle);
+        }else{
+            trigger_error("Cannot write in " + $this->logDir);
+        }
     }
 }
 ?>

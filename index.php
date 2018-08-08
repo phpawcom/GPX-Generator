@@ -2,7 +2,7 @@
 error_reporting(E_ALL & ~E_STRICT & ~E_NOTICE);
 include('config.php'); ## Make sure to change config.sample.php to config.php after adding API Key
 include('class.core.php');
-$gpxGen = new gpxGen($apiKey);
+$gpxGen = new gpxGen($apiKey, $logInputs);
 if($_POST){
     $from = explode(',', $_POST['from_gps']);
     $to = explode(',', $_POST['to_gps']);
