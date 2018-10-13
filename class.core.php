@@ -48,7 +48,7 @@ class gpxGen extends PolylineEncoder {
         if ( func_num_args() == 4){
             $args = array_slice(func_get_args(), 0);
             if(count(array_filter($args, array($this, '_is_double'))) === count($args)){
-                $data = $this->api('https://maps.googleapis.com/maps/api/directions/json?origin='.$args[0].','.$args[1].'&destination='.$args[2].','.$args[3].'&key='.$apiKey);
+                $data = $this->api('https://maps.googleapis.com/maps/api/directions/json?origin='.$args[0].','.$args[1].'&destination='.$args[2].','.$args[3].'&key='.$this->apiKey);
                 if(!empty($data)){
                     $data = json_decode($data, true);
                     if(is_array($data) && count($data) > 0){
