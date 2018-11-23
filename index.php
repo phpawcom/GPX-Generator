@@ -89,6 +89,7 @@ if($_POST){
     </style>
     <script type="text/javascript">
         var map, mapOptions, mgeocoder;
+        var latlong = /^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$/;
         var __load_google_places = function(){
             "use strict";
             if($('.google-places-gps-from').length && typeof google === 'object'){
@@ -192,6 +193,18 @@ if($_POST){
                 alert('You must select two locations');
             }            
             return response;
+        });
+        $(document).on('blur', 'input[name=from]', function(){
+        	"use strict";
+        	if(latlong.test($(this).val())){
+        		$('input[name=from_gps]').val($(this).val()).trigger('change');
+        	}
+        });
+        $(document).on('blur', 'input[name=to]', function(){
+        	"use strict";
+        	if(latlong.test($(this).val())){
+        		$('input[name=to_gps]').val($(this).val()).trigger('change');
+        	}
         });
     </script>
 </body>
